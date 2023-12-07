@@ -10,7 +10,7 @@
 - 提供即时导出功能，可以方便地储存更新后的标注结果，适用于后续的数据处理或分析。
 ## 操作说明
 ### 1. 设置需要标注的语料及标注项
-- 使用表格处理软件（如Excel）编辑仓库中的[3个CSV文件](https://github.com/RobLinkA/CorposAnnotation/tree/main/CSV%E6%95%B0%E6%8D%AE%E6%A8%A1%E6%9D%BF"CSV数据模板")。
+- 使用表格处理软件（如Excel）编辑仓库中的[3个CSV文件](https://github.com/RobLinkA/CorposAnnotation/tree/main/CSV%E6%95%B0%E6%8D%AE%E6%A8%A1%E6%9D%BF)。
 - 注意：在Excel中，须从“数据”菜单中选择“从文本/CSV获取”，打开CSV文件，并确保设置逗号为分隔符，以避免文本出现乱码。
 ### 2. 上传平行语料CSV
 - 打开“语料库标注工具”网页。
