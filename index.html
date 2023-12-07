@@ -47,6 +47,10 @@
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   }
+  .corpus-entry.modified {
+    background-color: #e0f4ff; /* 浅蓝色背景 */
+    border: 2px solid #0277bd; /* 深蓝色加粗边框 */
+  }
   .annotation-group {
     margin-bottom: 10px;
   }
@@ -72,9 +76,6 @@
 </div>
 
 <script>
-// JavaScript functions
-
-// Global variables to store the data
 let parallelCorpus = [];
 let annotationGroups = [];
 let annotations = [];
@@ -90,6 +91,9 @@ function handleFileSelect(type) {
       switch (type) {
         case 'corpus':
           parallelCorpus = results.data;
+          parallelCorpus.forEach(item => {
+            item.Annotation_JSON = item.Annotation_JSON ? JSON.parse(item.Annotation_JSON) : [];
+          });
           break;
         case 'groups':
           annotationGroups = results.data;
@@ -106,25 +110,22 @@ function handleFileSelect(type) {
   });
 }
 
-// Function to display the parallel corpus and annotation options
 function displayParallelCorpus() {
   const corpusContainer = document.getElementById('corpus-container');
   corpusContainer.innerHTML = '';
 
-  // Display the parallel corpus
-  parallelCorpus.forEach((entry, index) => {
+  parallelCorpus.forEach((entry) => {
     const corpusEntryDiv = document.createElement('div');
     corpusEntryDiv.className = 'corpus-entry';
     
     for (const [key, value] of Object.entries(entry)) {
-      if (key !== 'ParagraphID') {
+      if (key !== 'ParagraphID' && key !== 'Annotation_JSON') {
         const p = document.createElement('p');
         p.innerHTML = `<strong>${key}:</strong> ${value}`;
         corpusEntryDiv.appendChild(p);
       }
     }
     
-    // Add annotation groups
     annotationGroups.forEach(group => {
       const groupDiv = document.createElement('div');
       groupDiv.className = 'annotation-group';
@@ -138,9 +139,17 @@ function displayParallelCorpus() {
         input.name = 'annotation';
         input.dataset.sentenceId = entry['ID'];
         input.dataset.annotationId = a['AnnotationID'];
+        if (entry.Annotation_JSON.includes(a['AnnotationID'])) {
+          input.checked = true;
+        }
         label.appendChild(input);
         label.append(a['AnnotationName']);
         groupDiv.appendChild(label);
+
+        // Add event listener for checkbox change
+        input.addEventListener('change', () => {
+          corpusEntryDiv.classList.add('modified');
+        });
       });
       
       corpusEntryDiv.appendChild(groupDiv);
@@ -150,7 +159,6 @@ function displayParallelCorpus() {
   });
 }
 
-// Function to collect annotations and export to CSV
 function exportToCSV() {
   const exportData = parallelCorpus.map(entry => {
     const annotationCheckboxes = document.querySelectorAll(`input[type="checkbox"][data-sentence-id="${entry.ID}"]:checked`);
@@ -161,29 +169,22 @@ function exportToCSV() {
     };
   });
 
-  // Define the fields for the CSV, including ParagraphID and the new Annotation_JSON
-  const fields = ['ID', 'ParagraphID', ...Object.keys(parallelCorpus[0]).filter(key => key !== 'ID' && key !== 'ParagraphID'), 'Annotation_JSON'];
+  // Use the same fields as the input for the CSV export
+  const fields = Object.keys(parallelCorpus[0]);
 
-  // Generate the CSV string
   const csv = Papa.unparse({
     fields: fields,
     data: exportData
   });
 
-  // Create a Blob from the CSV string
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  // Create a URL for the Blob
   const url = URL.createObjectURL(blob);
-  // Create a temporary link element
   const link = document.createElement('a');
   link.setAttribute('href', url);
   link.setAttribute('download', 'annotated_corpus.csv');
   link.style.visibility = 'hidden';
-  // Append the link to the body
   document.body.appendChild(link);
-  // Simulate a click on the link to start the download
   link.click();
-  // Remove the link from the body
   document.body.removeChild(link);
 }
 </script>
